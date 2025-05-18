@@ -37,6 +37,18 @@ module.exports = grammar({
 
   extras: ($) => [$.comment, /\s/],
 
+  conflicts: ($) => [
+    [$.variable_declaration, $.typed_declaration],
+    [$.field, $.variable],
+    [$._expression_list, $._variable_assignment_explist],
+    [$.par_type_list, $.par_type],
+    [$.par_type],
+    [$.function_type],
+    [$.type],
+    [$.type_list],
+    [$.return_list],
+  ],
+
   externals: ($) => [
     $._block_comment_start,
     $._block_comment_content,
@@ -99,8 +111,152 @@ module.exports = grammar({
         $.repeat_statement,
         $.if_statement,
         $.for_statement,
-        $.declaration
+        $.declaration,
       ),
+
+    // basetype ::= ‘string’ | ‘boolean’ | ‘nil’ | ‘number’ |
+    //   ‘{’ type {',' type} ‘}’ | ‘{’ type ‘:’ type ‘}’ | functiontype
+    //   | nominal
+    base_type: ($) => choice(
+        'string', 'boolean', 'nil', 'number', field('tuple_type', seq('{', $.type, repeat(seq(',', $.type)), '}')),
+        field('map_type', seq('{', $.type, ':', $.type, '}')),
+        $.function_type,
+        $.nominal
+    ),
+
+    // nominal ::= Name {{‘.’ Name }} [typeargs]
+    nominal: ($) => seq($.identifier, repeat(seq('.', $.identifier)), optional($.type_args)),
+
+    // type ::= ‘(’ type ‘)’ | basetype {‘|’ basetype}
+    type: ($) => choice(
+      seq('(', $.type, ')'),
+      seq($.base_type, repeat(seq('|', $.base_type))),
+    ),
+
+    // typelist ::= type {',' type}
+    type_list: ($) => seq($.type, repeat1(seq(',', $.type))),
+
+    // retlist ::= ‘(’ [typelist] [‘...’] ‘)’ | typelist [‘...’]
+    //
+    return_list: ($) =>
+      choice(
+        seq('(', optional($.type_list), optional('...'), ')'),
+        seq($.type_list, optional('...'))),
+
+    // typeargs ::= ‘<’ Name {‘,’ Name } ‘>’
+    //
+    type_args: ($) => seq('<', $.identifier, repeat(seq(',', $.identifier)), '>'),
+
+    // newtype ::= ‘record’ recordbody | ‘enum’ enumbody | type
+    //     | ‘require’ ‘(’ LiteralString ‘)’ {‘.’ Name }
+    new_type: ($) =>
+      choice(
+        seq('record', $.record_body),
+        seq('enum', $.enum_body),
+        $.type,
+        seq('require', '(', $.string, ')', repeat(seq('.', $.identifier))),
+      ),
+
+    // stmt ::= ... | ‘local’ attnamelist [‘:’ typelist] [‘=’ explist] | ...
+    typed_declaration: ($) =>
+      seq('local', $._att_name_list, optional(seq(':', $.type_list)), optional(seq('=', $._expression_list))),
+
+    // interfacelist ::= nominal {‘,’ nominal} |
+    //     ‘{’ type ‘}’ {‘,’ nominal}
+    interface_list: ($) =>
+      choice(
+        seq($.nominal, repeat(seq(',', $.nominal))),
+          seq('{', $.type, '}', repeat(seq(',', $.nominal)))),
+    
+    // stmt ::= ... | ‘local’ ‘record’ Name recordbody | ...
+    record_declaration: ($) => seq('local', 'record', field('name', $.identifier), $.record_body),
+
+    // stmt ::= ... | ‘local’ ‘interface’ Name recordbody |
+    interface_declaration: ($) => seq('local', 'interface', field('name', $.identifier), $.record_body),
+
+    // stmt ::= ... | ‘local’ ‘enum’ Name enumbody |
+    enum_declaration: ($) => seq('local', 'enum', field('name', $.identifier), $.enum_body),
+
+    // stmt ::= ... | ‘local’ ‘type’ Name ‘=’ newtype |
+    type_declaration: ($) => seq('local', 'type', field('name', $.identifier), $.new_type),
+
+    // stmt ::= ... | ‘global’ attnamelist ‘=’ explist |
+    global_declaration: ($) => seq('global', $._att_name_list, '=', $._expression_list),
+
+    // stmt ::= ... | ‘global’ attnamelist ‘:’ typelist [‘=’ explist] |
+    global_typed_declaration: ($) =>
+      seq(
+        'global',
+        $._att_name_list,
+        ':',
+        $.type_list,
+        optional(seq('=', $._expression_list))
+      ),
+
+    // stmt ::= ... | ‘global’ ‘function’ Name funcbody |
+    global_function_declaration: ($) => seq('global', 'function', field('name', $.identifier), $._function_body),
+
+    // stmt ::= ... | ‘global’ ‘record’ Name recordbody |
+    global_record_declaration: ($) => seq('global', 'record', field('name', $.identifier), $.record_body),
+
+    // stmt ::= ... | ‘global’ ‘interface’ Name recordbody |
+    global_interface_declaration: ($) => seq('global', 'interface', field('name', $.identifier), $.record_body),
+
+    // stmt ::= ... | ‘global’ ‘enum’ Name enumbody |
+    global_enum_declaration: ($) => seq('global', 'enum', field('name', $.identifier), $.enum_body),
+
+    // stmt ::= ... | ‘global’ ‘type’ Name [‘=’ newtype]
+    global_type_declaration: ($) => seq('global', 'type', field('name', $.identifier), optional(seq('=', $.new_type))),
+
+    // recordbody ::= [typeargs] [‘is’ interfacelist]
+    //     [‘where’ exp] {recordentry} ‘end’
+    record_body: ($) =>
+      seq(
+        optional($.type_args),
+        optional(seq('is', $.interface_list)),
+        optional(seq('where', $.expression)),
+        repeat($.record_entry),
+        'end'),
+
+    // recordentry ::= ‘userdata’ |
+    //     ‘type’ Name ‘=’ newtype | [‘metamethod’] recordkey ‘:’ type |
+    //     ‘record’ Name recordbody | ‘enum’ Name enumbody
+    record_entry: ($) =>
+      choice(
+        'userdata',
+        seq('type', $.identifier, '=', $.new_type),
+        seq(optional('metamethod'), $.record_key, ':', $.type),
+        seq('record', $.identifier, $.record_body),
+        seq('enum', $.identifier, $.enum_body),
+      ),
+
+    // recordkey ::= Name | ‘[’ LiteralString ‘]’
+    record_key: ($) => choice($.identifier, seq('[', $.string, ']')),
+
+    // enumbody ::= {LiteralString} ‘end’
+    enum_body: ($) => seq(repeat($.string), 'end'),
+
+    // functiontype ::= ‘function’ [typeargs] ‘(’ partypelist ‘)’ [‘:’ retlist]
+    function_type: ($) => seq('function', optional($.type_args), '(', $.par_type_list, ')', optional(seq(':', $.return_list))), 
+
+    // parlist ::= parnamelist [‘,’ ‘...’ [‘:’ type]] | ‘...’ [‘:’ type]
+    par_list: ($) => seq($.par_name_list, optional(seq(',', '...', optional(seq(':', field('type', $.type)))))),
+
+    // partypelist ::= partype {‘,’ partype}
+    par_type_list: ($) => seq($.par_type, repeat(seq(',', $.par_type))),
+
+    // partype ::= Name [‘?’] ‘:’ type | [‘?’] type
+    par_type: ($) =>
+      choice(
+        seq($.identifier, optional('?'), ':', field('type', $.type)),
+        seq(optional('?'), $.par_type)
+      ),
+
+    // parnamelist ::= parname {‘,’ parname}
+    par_name_list: ($) => seq($.par_name, repeat(seq(',', $.par_name))),
+
+    // parname ::= Name [‘?’] [‘:’ type]
+    par_name: ($) => seq($.identifier, optional('?'), optional(seq(':', field('type', $.type)))),
 
     // retstat ::= return [explist] [';']
     return_statement: ($) =>
@@ -218,7 +374,19 @@ module.exports = grammar({
           'local_declaration',
           alias($._local_function_declaration, $.function_declaration)
         ),
-        field('local_declaration', $.variable_declaration)
+        field('local_declaration', $.variable_declaration),
+        field('local_declaration', $.typed_declaration),
+        field('record_declaration', $.record_declaration),
+        field('interface_declaration', $.interface_declaration),
+        field('enum_declaration', $.enum_declaration),
+        field('type_declaration', $.type_declaration),
+        field('global_declaration', $.global_declaration),
+        field('global_typed_reclaration', $.global_typed_declaration),
+        field('global_record_reclaration', $.global_record_declaration),
+        field('global_interface_reclaration', $.global_interface_declaration),
+        field('global_enum_reclaration', $.global_enum_declaration),
+        field('global_function_reclaration', $.global_function_declaration),
+        field('global_type_reclaration', $.global_type_declaration),
       ),
     // function funcname funcbody
     function_declaration: ($) =>
@@ -500,7 +668,13 @@ module.exports = grammar({
           field('value', $.expression)
         ),
         seq(field('name', $.identifier), '=', field('value', $.expression)),
-        field('value', $.expression)
+        field('value', $.expression),
+        seq(
+          field('name', $.identifier),
+          optional(seq(':', field('type', $.type))),
+          '=',
+          field('value', $.expression)
+        ),
       ),
 
     // exp binop exp
