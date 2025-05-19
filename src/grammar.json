@@ -453,7 +453,7 @@
             },
             {
               "type": "SYMBOL",
-              "name": "record_body"
+              "name": "_record_body"
             }
           ]
         },
@@ -466,7 +466,7 @@
             },
             {
               "type": "SYMBOL",
-              "name": "enum_body"
+              "name": "_enum_body"
             }
           ]
         },
@@ -652,7 +652,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "record_body"
+          "name": "_record_body"
         }
       ]
     },
@@ -677,7 +677,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "record_body"
+          "name": "_record_body"
         }
       ]
     },
@@ -702,7 +702,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "enum_body"
+          "name": "_enum_body"
         }
       ]
     },
@@ -840,7 +840,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "record_body"
+          "name": "_record_body"
         }
       ]
     },
@@ -865,7 +865,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "record_body"
+          "name": "_record_body"
         }
       ]
     },
@@ -890,7 +890,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "enum_body"
+          "name": "_enum_body"
         }
       ]
     },
@@ -936,7 +936,7 @@
         }
       ]
     },
-    "record_body": {
+    "_record_body": {
       "type": "SEQ",
       "members": [
         {
@@ -1076,7 +1076,7 @@
             },
             {
               "type": "SYMBOL",
-              "name": "record_body"
+              "name": "_record_body"
             }
           ]
         },
@@ -1093,7 +1093,7 @@
             },
             {
               "type": "SYMBOL",
-              "name": "enum_body"
+              "name": "_enum_body"
             }
           ]
         }
@@ -1125,7 +1125,7 @@
         }
       ]
     },
-    "enum_body": {
+    "_enum_body": {
       "type": "SEQ",
       "members": [
         {
@@ -2063,7 +2063,7 @@
         },
         {
           "type": "FIELD",
-          "name": "global_typed_reclaration",
+          "name": "global_typed_declaration",
           "content": {
             "type": "SYMBOL",
             "name": "global_typed_declaration"
@@ -2071,7 +2071,7 @@
         },
         {
           "type": "FIELD",
-          "name": "global_record_reclaration",
+          "name": "global_record_declaration",
           "content": {
             "type": "SYMBOL",
             "name": "global_record_declaration"
@@ -2079,7 +2079,7 @@
         },
         {
           "type": "FIELD",
-          "name": "global_interface_reclaration",
+          "name": "global_interface_declaration",
           "content": {
             "type": "SYMBOL",
             "name": "global_interface_declaration"
@@ -2087,7 +2087,7 @@
         },
         {
           "type": "FIELD",
-          "name": "global_enum_reclaration",
+          "name": "global_enum_declaration",
           "content": {
             "type": "SYMBOL",
             "name": "global_enum_declaration"
@@ -2095,7 +2095,7 @@
         },
         {
           "type": "FIELD",
-          "name": "global_function_reclaration",
+          "name": "global_function_declaration",
           "content": {
             "type": "SYMBOL",
             "name": "global_function_declaration"
@@ -2103,7 +2103,7 @@
         },
         {
           "type": "FIELD",
-          "name": "global_type_reclaration",
+          "name": "global_type_declaration",
           "content": {
             "type": "SYMBOL",
             "name": "global_type_declaration"
