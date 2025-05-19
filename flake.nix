@@ -24,6 +24,7 @@
         { pkgs, ... }:
         {
           default = pkgs.tree-sitter.buildGrammar {
+            pname = "tree-sitter-teal";
             language = "teal";
             version = "0.0.0";
             src = ./.;
