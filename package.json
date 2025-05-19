@@ -1,8 +1,8 @@
 {
-  "name": "@tree-sitter-grammars/tree-sitter-lua",
-  "version": "0.4.0",
-  "description": "Lua grammar for tree-sitter",
-  "repository": "https://github.com/tree-sitter-grammars/tree-sitter-lua",
+  "name": "@tree-sitter-grammars/tree-sitter-teal",
+  "version": "0.1.0",
+  "description": "Teal grammar for tree-sitter",
+  "repository": "https://github.com/sid-code/tree-sitter-teal",
   "license": "MIT",
   "author": {
     "name": "Munif Tanjim",
@@ -15,6 +15,7 @@
     "incremental",
     "parsing",
     "tree-sitter",
+    "teal",
     "lua"
   ],
   "files": [

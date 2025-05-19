@@ -1,13 +1,13 @@
 {
   "grammars": [
     {
-      "name": "lua",
+      "name": "teal",
       "path": ".",
-      "scope": "source.lua",
+      "scope": "source.tl",
       "file-types": [
-        "lua"
+        "tl"
       ],
-      "injection-regex": "^lua$",
+      "injection-regex": "^tl$",
       "highlights": "queries/highlights.scm",
       "injections": "queries/injections.scm",
       "locals": "queries/locals.scm",
@@ -25,7 +25,7 @@
       }
     ],
     "links": {
-      "repository": "https://github.com/tree-sitter-grammars/tree-sitter-lua"
+      "repository": "https://github.com/sid-code/tree-sitter-teal"
     }
   }
 }
