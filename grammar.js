@@ -381,12 +381,12 @@ module.exports = grammar({
         field('enum_declaration', $.enum_declaration),
         field('type_declaration', $.type_declaration),
         field('global_declaration', $.global_declaration),
-        field('global_typed_reclaration', $.global_typed_declaration),
-        field('global_record_reclaration', $.global_record_declaration),
-        field('global_interface_reclaration', $.global_interface_declaration),
-        field('global_enum_reclaration', $.global_enum_declaration),
-        field('global_function_reclaration', $.global_function_declaration),
-        field('global_type_reclaration', $.global_type_declaration),
+        field('global_typed_declaration', $.global_typed_declaration),
+        field('global_record_declaration', $.global_record_declaration),
+        field('global_interface_declaration', $.global_interface_declaration),
+        field('global_enum_declaration', $.global_enum_declaration),
+        field('global_function_declaration', $.global_function_declaration),
+        field('global_type_declaration', $.global_type_declaration),
       ),
     // function funcname funcbody
     function_declaration: ($) =>
