@@ -151,8 +151,8 @@ module.exports = grammar({
     //     | ‘require’ ‘(’ LiteralString ‘)’ {‘.’ Name }
     new_type: ($) =>
       choice(
-        seq('record', $.record_body),
-        seq('enum', $.enum_body),
+        seq('record', $._record_body),
+        seq('enum', $._enum_body),
         $.type,
         seq('require', '(', $.string, ')', repeat(seq('.', $.identifier))),
       ),
@@ -169,13 +169,13 @@ module.exports = grammar({
           seq('{', $.type, '}', repeat(seq(',', $.nominal)))),
     
     // stmt ::= ... | ‘local’ ‘record’ Name recordbody | ...
-    record_declaration: ($) => seq('local', 'record', field('name', $.identifier), $.record_body),
+    record_declaration: ($) => seq('local', 'record', field('name', $.identifier), $._record_body),
 
     // stmt ::= ... | ‘local’ ‘interface’ Name recordbody |
-    interface_declaration: ($) => seq('local', 'interface', field('name', $.identifier), $.record_body),
+    interface_declaration: ($) => seq('local', 'interface', field('name', $.identifier), $._record_body),
 
     // stmt ::= ... | ‘local’ ‘enum’ Name enumbody |
-    enum_declaration: ($) => seq('local', 'enum', field('name', $.identifier), $.enum_body),
+    enum_declaration: ($) => seq('local', 'enum', field('name', $.identifier), $._enum_body),
 
     // stmt ::= ... | ‘local’ ‘type’ Name ‘=’ newtype |
     type_declaration: ($) => seq('local', 'type', field('name', $.identifier), $.new_type),
@@ -197,20 +197,20 @@ module.exports = grammar({
     global_function_declaration: ($) => seq('global', 'function', field('name', $.identifier), $._function_body),
 
     // stmt ::= ... | ‘global’ ‘record’ Name recordbody |
-    global_record_declaration: ($) => seq('global', 'record', field('name', $.identifier), $.record_body),
+    global_record_declaration: ($) => seq('global', 'record', field('name', $.identifier), $._record_body),
 
     // stmt ::= ... | ‘global’ ‘interface’ Name recordbody |
-    global_interface_declaration: ($) => seq('global', 'interface', field('name', $.identifier), $.record_body),
+    global_interface_declaration: ($) => seq('global', 'interface', field('name', $.identifier), $._record_body),
 
     // stmt ::= ... | ‘global’ ‘enum’ Name enumbody |
-    global_enum_declaration: ($) => seq('global', 'enum', field('name', $.identifier), $.enum_body),
+    global_enum_declaration: ($) => seq('global', 'enum', field('name', $.identifier), $._enum_body),
 
     // stmt ::= ... | ‘global’ ‘type’ Name [‘=’ newtype]
     global_type_declaration: ($) => seq('global', 'type', field('name', $.identifier), optional(seq('=', $.new_type))),
 
     // recordbody ::= [typeargs] [‘is’ interfacelist]
     //     [‘where’ exp] {recordentry} ‘end’
-    record_body: ($) =>
+    _record_body: ($) =>
       seq(
         optional($.type_args),
         optional(seq('is', $.interface_list)),
@@ -226,15 +226,15 @@ module.exports = grammar({
         'userdata',
         seq('type', $.identifier, '=', $.new_type),
         seq(optional('metamethod'), $.record_key, ':', $.type),
-        seq('record', $.identifier, $.record_body),
-        seq('enum', $.identifier, $.enum_body),
+        seq('record', $.identifier, $._record_body),
+        seq('enum', $.identifier, $._enum_body),
       ),
 
     // recordkey ::= Name | ‘[’ LiteralString ‘]’
     record_key: ($) => choice($.identifier, seq('[', $.string, ']')),
 
     // enumbody ::= {LiteralString} ‘end’
-    enum_body: ($) => seq(repeat($.string), 'end'),
+    _enum_body: ($) => seq(repeat($.string), 'end'),
 
     // functiontype ::= ‘function’ [typeargs] ‘(’ partypelist ‘)’ [‘:’ retlist]
     function_type: ($) => seq('function', optional($.type_args), '(', $.par_type_list, ')', optional(seq(':', $.return_list))), 
